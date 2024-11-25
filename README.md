@@ -1,87 +1,101 @@
-# ASP.NET API App to Fetch Data from Oracle Database
+# Madar Dijla - Application Payment Api
 
-This is a simple **ASP.NET Core** API application that fetches data from an **Oracle Database**. The app exposes RESTful endpoints for retrieving data, performing CRUD operations, and querying the database.
+## Postman Collection
 
-## Features
+- I have uploaded the Postman collection here:
+The name of Collection `APP_API_PAY.postman_collection.json`.
+[Download the Postman Collection](https://drive.google.com/file/d/1lFKOf-tiEwFeFCXFn8iiHJO_sYeEH2Fy/view?usp=sharing)
+- After download it, open it with Postman.
+- Test all endpoint below.
 
-- **Fetch data from Oracle Database**: The API connects to an Oracle Database to fetch records.
-- **CRUD Operations**: Create, Read, Update, Delete operations on the database (optional, depending on your implementation).
-- **RESTful API Endpoints**: The app provides well-defined RESTful endpoints for interacting with the Oracle database.
-- **JSON Responses**: The API returns data in JSON format, suitable for client-side consumption.
+## Authentication and Authorization:
 
-## Tech Stack
+### 1. Username and Password to Generate Token
+   - Send the username and password to the authentication endpoint to receive a bearer token.
+   - The token is used to authenticate subsequent requests.
 
-- **Programming Language**: C#
-- **Framework**: ASP.NET Core
-- **Database**: Oracle Database
-- **ORM**: [Oracle Data Provider for .NET (ODP.NET)](https://www.oracle.com/database/technologies/dotnet-odacdeploy-downloads.html)
-- **Authentication**: [JWT](https://jwt.io/) (if applicable)
+### 2. Bearer Token Sent with Requests:
+   - Include the bearer token in the Authorization header for subsequent requests to access the application data.
 
-## Setup
+## Endpoints
 
-### Prerequisites
+### 1. Login and Get Bearer Token
+   - **Endpoint:** `POST http://172.28.1.120:8050/api/auth/login`
+   - **Request:**
+     ```json
+     {
+       "username": "Adminpay",
+       "password": "adminpay0"
+     }
+     ```
+   - **Response:**
+     - **Success (200):**
+       ```json
+       {
+         "isSuccess": true,
+         "results": {
+           "token": "***********************************************************
+             ************************************************"
+         },
+         "errors": []
+       }
+       ```
+     - **Error (401):**
+       ```json
+       {
+         "isSuccess": false,
+         "results": null,
+         "errors": ["Invalid credentials"]
+       }
+       ```
+   
 
-Before getting started, ensure that you have the following:
+### 2. Get Application Data
+   - **Endpoint:** `GET http://172.28.1.120:8050/api/user/:appid`
+   - **Request Parameters:**
+     - `appid`: Application ID (send in long format).
+   - **Headers:**
+    
 
-1. **Oracle Database**: You should have access to an Oracle Database instance.
-2. **.NET SDK**: Make sure you have .NET SDK installed. You can download it from [Microsoft's official .NET download page](https://dotnet.microsoft.com/download).
-3. **Oracle Data Provider for .NET (ODP.NET)**: Install the **Oracle Data Provider for .NET (ODP.NET)** to allow communication with Oracle databases. You can find the installation instructions [here](https://www.oracle.com/database/technologies/dotnet-odacdeploy-downloads.html).
+| Header          | Description                                        |
+|:--------------- |:-------------------------------------------------- |
+| `UserName`      | Your username                                      |
+| `Password`      | Your password                                      |
+| `Token`         | Bearer token generated from login (SHA256 hashed). |
+| `Accept`        | `application/json, text/plain, */*`                |
+| `Authorization` | `Bearer <Token>` from login.                       |
+| `Content-Type`  | `application/json`.                                |
 
-### Installation
 
-1. Clone the repository:
+   - **Response:**
+     - **Success (200):**
+       ```json
+       {
+         "isSuccess": true,
+         "results": {
+           "application_ID": "101010213971",
+           "created": "2018-01-10T09:34:18.329",
+           "useCase": "NEW_VR",
+           "brand": "هونداي",
+           "licenseNumber": "٤٣٣٣٣ج",
+           "licenseNumberLatin": "J43333",
+           "appChassisNumber": "JMXSDCS3ALL700437",
+           "vehicleType": "النترا"
+         },
+         "errors": []
+       }
+       ```
+     - **Error (404):**
+       ```json
+       {
+         "isSuccess": false,
+         "results": null,
+         "errors": ["Application not found"]
+       }
+       ```
 
-    ```bash
-    git clone https://github.com/KAJOiq/Api-with-oracle-database.git
-    cd Api-with-oracle-database
-    ```
+---
+## Notes:
 
-2. Open the solution in Visual Studio or Visual Studio Code.
-
-3. Install the necessary NuGet packages:
-
-    - Install `Oracle.ManagedDataAccess` for Oracle database access:
-
-    ```bash
-    dotnet add package Oracle.ManagedDataAccess
-    ```
-
-    - If you plan to use JWT authentication, install the `Microsoft.AspNetCore.Authentication.JwtBearer` package:
-
-    ```bash
-    dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
-    ```
-
-4. Configure the Oracle Database connection in the `appsettings.json` file:
-
-    ```json
-    {
-      "ConnectionStrings": {
-        "OracleDb": "User Id=<your_username>;Password=<your_password>;Data Source=<your_oracle_connection_string>"
-      }
-    }
-    ```
-
-    Replace `<your_username>`, `<your_password>`, and `<your_oracle_connection_string>` with your actual Oracle database credentials and connection string.
-
-### Running the Application
-
-1. Build and run the application:
-
-    ```bash
-    dotnet run
-    ```
-
-2. The API should now be running locally at `http://localhost:5000` (or whatever port is configured in your app).
-
-### API Endpoints
-
-Below are the available API endpoints:
-
-#### 1. **GET /api/data**
-
-Fetch all records from the `users` table (or your relevant table in the Oracle database).
-
-- **Request**:
-  ```bash
-  curl -X GET http://localhost:5000/api/auth/login
+- You must include the Bearer token in the `Authorization` header when requesting application data.
+- The Bearer token will expire 24 hours after creation. 
